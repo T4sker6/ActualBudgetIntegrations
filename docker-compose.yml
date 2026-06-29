@@ -1,0 +1,22 @@
+services:
+  bank-actual:
+    build: .
+    container_name: bank-actual
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Warsaw
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./data:/app/data
+      # Mapowania kont — utwórz accounts.json (z accounts.example.json) PRZED uruchomieniem.
+      # Montuj tylko dla banków włączonych w ENABLED_BANKS:
+      - ./VeloBankIntegration/accounts.json:/app/VeloBankIntegration/accounts.json:ro
+      # - ./PKOBankIntegration/accounts.json:/app/PKOBankIntegration/accounts.json:ro
+
+    # Jeśli Actual Budget działa w Dockerze, podłącz kontener do jego sieci,
+    # a w .env ustaw ACTUAL_BASE_URL=http://<nazwa-kontenera-actual>:5006
+    # networks:
+    #   - actual
+# networks:
+#   actual:
+#     external: true

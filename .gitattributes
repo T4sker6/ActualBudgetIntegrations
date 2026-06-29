@@ -1,0 +1,3 @@
+# Skrypty powłoki zawsze z końcami linii LF — działają w kontenerze Linux,
+# nawet gdy repo jest klonowane/edytowane na Windows.
+*.sh text eol=lf

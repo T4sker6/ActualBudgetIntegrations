@@ -1,0 +1,13 @@
+# Sekrety i dane wrażliwe nie trafiają do warstw obrazu (montujemy je runtime)
+.env
+**/accounts.json
+data/
+*.log
+*.pdf
+*.zip
+
+.git/
+__pycache__/
+*.py[cod]
+.venv/
+venv/

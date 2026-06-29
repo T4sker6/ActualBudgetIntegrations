@@ -1,0 +1,5 @@
+python-dotenv
+imap-tools
+pdfplumber
+actualpy
+requests

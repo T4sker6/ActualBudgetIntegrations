@@ -1,0 +1,16 @@
+# Sekrety i dane wrażliwe — NIGDY do repo
+.env
+**/accounts.json
+data/
+*.log
+
+# Wyciągi / załączniki (PII)
+*.pdf
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
