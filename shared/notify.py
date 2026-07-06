@@ -24,14 +24,23 @@ def success(webhook_url: str, bank_name: str, summary: dict) -> None:
 
     summary: {accounts: [{account, name, count, range, closing}], statement, subject}
     """
+    accounts = summary.get("accounts", [])
+    skipped = summary.get("skipped", [])
     lines = []
-    for acc in summary.get("accounts", []):
+    for acc in accounts:
         lines.append(
             f"**{acc['name']}** ({mask_account(acc['account'])}): "
             f"{acc['count']} transakcji, {acc['range']}, saldo {acc['closing']}"
         )
+    if skipped:
+        lines.append(f"⏭️ Pominięto {len(skipped)} wyciąg(ów) okresowych: {', '.join(skipped)}")
+    title = (
+        f"✅ {bank_name.upper()} — wyciąg zaimportowany"
+        if accounts
+        else f"⏭️ {bank_name.upper()} — pominięto (wyciągi okresowe)"
+    )
     embed = {
-        "title": f"✅ {bank_name.upper()} — wyciąg zaimportowany",
+        "title": title,
         "color": GREEN,
         "description": "\n".join(lines) or "Brak transakcji w wyciągu.",
         "fields": [

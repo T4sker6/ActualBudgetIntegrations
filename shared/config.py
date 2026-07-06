@@ -26,6 +26,7 @@ class Config:
     actual_password: str
     actual_encryption_password: str | None
     actual_file: str
+    actual_verify_ssl: bool
 
     def pdf_password(self, env_name: str) -> str:
         """Hasło do PDF danego banku (np. VELO_PDF_PASSWORD)."""
@@ -49,6 +50,7 @@ def load() -> Config:
     enabled = [b.strip().lower() for b in os.getenv("ENABLED_BANKS", "").split(",") if b.strip()]
 
     encryption = os.getenv("ACTUAL_ENCRYPTION_PASSWORD", "").strip() or None
+    verify_ssl = os.getenv("ACTUAL_VERIFY_SSL", "true").strip().lower() not in ("false", "0", "no")
 
     return Config(
         enabled_banks=enabled,
@@ -60,4 +62,5 @@ def load() -> Config:
         actual_password=_require("ACTUAL_PASSWORD"),
         actual_encryption_password=encryption,
         actual_file=_require("ACTUAL_FILE"),
+        actual_verify_ssl=verify_ssl,
     )

@@ -148,6 +148,11 @@ def _extract_meta(full_text: str) -> tuple[str, dict]:
     m = re.search(rf"za okres od\s*({DATE})\s*do\s*({DATE})", full_text)
     if m:
         meta["period"] = f"{m.group(1)}–{m.group(2)}"
+        meta["period_from"] = m.group(1)
+        meta["period_to"] = m.group(2)
+        # Wyciąg dzienny obejmuje jeden dzień (od == do). Okresowy (miesięczny/
+        # półroczny) ma zakres — takie olewamy, bo pracujemy na dziennych.
+        meta["single_day"] = m.group(1) == m.group(2)
     return account, meta
 
 

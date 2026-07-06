@@ -76,6 +76,7 @@ def open_actual(cfg: Config) -> Iterator[ActualClient]:
         password=cfg.actual_password,
         encryption_password=cfg.actual_encryption_password,
         file=cfg.actual_file,
+        cert=True if cfg.actual_verify_ssl else False,  # False = pomiń weryfikację (self-signed HTTPS)
     ) as actual:
         actual.download_budget()
         yield ActualClient(actual)

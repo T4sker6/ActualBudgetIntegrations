@@ -52,8 +52,15 @@ def process_message(bank: Bank, msg: MailMessage, actual: ActualClient, cfg: Con
         raise ValueError("Mail nie zawiera żadnego PDF w załącznikach ZIP.")
 
     accounts_summary = []
+    skipped = []
     for pdf in pdfs:
         stmt = bank.parse(pdf.data, password)
+        # Olewamy wyciągi okresowe (miesięczne/półroczne) — pracujemy tylko na dziennych.
+        if not stmt.meta.get("single_day", True):
+            period = stmt.meta.get("period", "?")
+            log.info("Pomijam wyciąg okresowy konta %s (okres %s).", stmt.account_number, period)
+            skipped.append(period)
+            continue
         validate_balance(stmt)
         write_csv(DATA_DIR, bank.name, stmt)
         account_name = map_account(bank.accounts_path, stmt.account_number)
@@ -73,9 +80,15 @@ def process_message(bank: Bank, msg: MailMessage, actual: ActualClient, cfg: Con
             }
         )
 
-    actual.commit()  # atomowo po całym mailu
+    if accounts_summary:
+        actual.commit()  # atomowo po całym mailu; commit tylko gdy coś zaimportowano
     statement_no = accounts_summary[0]["statement"] if accounts_summary else ""
-    return {"accounts": accounts_summary, "subject": msg.subject, "statement": statement_no}
+    return {
+        "accounts": accounts_summary,
+        "skipped": skipped,
+        "subject": msg.subject,
+        "statement": statement_no,
+    }
 
 
 def run() -> None:
