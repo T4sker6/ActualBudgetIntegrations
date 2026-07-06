@@ -90,8 +90,8 @@ def _dedup_repeat(tokens: list[str]) -> list[str]:
     """'X X reszta' -> 'X reszta' (Velo powtarza nazwę: 'ROSSMANN 25 ROSSMANN 25 Krakow')."""
     n = len(tokens)
     for k in range(1, n // 2 + 1):
-        if tokens[:k] == tokens[k : 2 * k]:
-            return tokens[:k] + tokens[2 * k :]
+        if tokens[:k] == tokens[k:2 * k]:
+            return tokens[:k] + tokens[2 * k:]
     return tokens
 
 
@@ -105,6 +105,14 @@ def _clean_payee(name: str) -> str:
 
 def _derive_payee(full_desc: str, fallback_type: str) -> str:
     """Nazwa kontrahenta z opisu (po markerze Odbiorca/Nadawca/na rzecz, przed adresem)."""
+    if "Operacja kartą" in fallback_type:
+        # płatność kartą: sprzedawca po „... PLN w <SPRZEDAWCA>, <miasto> (<kraj>..."
+        m = re.search(r"PLN\s+w\s+(.+)", full_desc)
+        if m:
+            name = _clean_payee(_norm(re.split(r"[(,]", m.group(1))[0]))
+            if name:
+                return name[:80]
+        return "Operacja kartą"
     before = full_desc.split("Tytułem:", 1)[0]
     pos, mlen = -1, 0
     for mk in PAYEE_MARKERS:
@@ -123,6 +131,8 @@ def _derive_payee(full_desc: str, fallback_type: str) -> str:
 
 def _derive_notes(full_desc: str, fallback_type: str) -> str:
     """Treść po 'Tytułem:'; gdy brak — typ transakcji."""
+    if "Operacja kartą" in fallback_type:
+        return "Operacja kartą"
     if "Tytułem:" in full_desc:
         return _norm(full_desc.split("Tytułem:", 1)[1]) or _norm(fallback_type)
     return _norm(fallback_type)
