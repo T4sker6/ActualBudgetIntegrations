@@ -31,7 +31,7 @@ AMOUNT = r"-?\d[\d  ]*,\d{2}"
 DATE_RE = re.compile(DATE)
 AMOUNT_RE = re.compile(AMOUNT)
 START_RE = re.compile(
-    rf"^({DATE})\s+({DATE})\s+(.*?)\s+({AMOUNT})\s+({AMOUNT})\s*$"
+    rf"^({DATE})\s+({DATE})\s+(.*?)\s*({AMOUNT})\s+({AMOUNT})\s*$"
 )
 
 # Markery, po których w opisie pojawia się nazwa kontrahenta
@@ -105,7 +105,7 @@ def _clean_payee(name: str) -> str:
 
 def _derive_payee(full_desc: str, fallback_type: str) -> str:
     """Nazwa kontrahenta z opisu (po markerze Odbiorca/Nadawca/na rzecz, przed adresem)."""
-    if "Operacja kartą" in fallback_type:
+    if "Operacja kartą" in full_desc:
         # płatność kartą: sprzedawca po „... PLN w <SPRZEDAWCA>, <miasto> (<kraj>..."
         m = re.search(r"PLN\s+w\s+(.+)", full_desc)
         if m:
@@ -131,7 +131,7 @@ def _derive_payee(full_desc: str, fallback_type: str) -> str:
 
 def _derive_notes(full_desc: str, fallback_type: str) -> str:
     """Treść po 'Tytułem:'; gdy brak — typ transakcji."""
-    if "Operacja kartą" in fallback_type:
+    if "Operacja kartą" in full_desc:
         return "Operacja kartą"
     if "Tytułem:" in full_desc:
         return _norm(full_desc.split("Tytułem:", 1)[1]) or _norm(fallback_type)
